@@ -1,13 +1,47 @@
 #include <SFML/Graphics.hpp>
 
+
+#define mapWidth 24
+#define mapHeight 24
+#define screenWidth 640
+#define screenHeight 480
+
+int worldMap[mapWidth][mapHeight]=
+        {
+                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
+                {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,1},
+                {1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+        };
+
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(1280, 720), "Raycast Demo");
+    sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Raycast Demo");
     window.setVerticalSyncEnabled(true);
 
 
     //player initialization
-    sf::CircleShape player(15.f);
+    sf::CircleShape player(5.f);
     player.setFillColor(sf::Color::Red);
     player.setPosition(600.f, 300.f);
 
@@ -37,17 +71,17 @@ int main()
         }
 
         //clear window
-        window.clear(sf::Color::Black);
+        window.clear(sf::Color::White);
 
         //ray logic
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-            rayAngle += 0.1f;
+            rayAngle += 0.05f;
             if (rayAngle > 2 * M_PI) {
                 rayAngle = 0.f;
             }
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-            rayAngle -= 0.1f;
+            rayAngle -= 0.05f;
             if (rayAngle < -2 * M_PI) {
                 rayAngle = 0.f;
             }
@@ -64,8 +98,29 @@ int main()
                 player.getPosition().y + player.getRadius()
                 ));
 
+
+        //draw array
+        float tileWidth = screenWidth / (float)mapWidth;
+        float tileHeight = screenHeight / (float)mapHeight;
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
+
+                sf::RectangleShape tile(sf::Vector2f( tileWidth - 1.f, tileHeight - 1.f));
+
+                if (worldMap[y][x] > 0) {
+                    tile.setFillColor(sf::Color::Blue);
+                } else {
+                    tile.setFillColor(sf::Color::Black);
+                }
+
+                tile.setPosition(x * tileWidth, y * tileHeight);
+                window.draw(tile);
+            }
+        }
+
+
         //move logic
-        float moveSpeedScalar = 4.f;
+        float moveSpeedScalar = 1.5;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
             player.move( moveSpeedScalar * rayPosX / rayLen, moveSpeedScalar * rayPosY / rayLen);
         }
