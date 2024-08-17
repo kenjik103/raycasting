@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 
+#include <iostream>
 
 #define mapWidth 24
 #define mapHeight 24
@@ -34,6 +35,13 @@ int worldMap[mapWidth][mapHeight]=
                 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
         };
 
+sf::Vector2f positionToArrayIndex(sf::Vector2f pos) {
+    float x = mapWidth * (pos.x / screenWidth);
+    float y = mapHeight * (pos.y / screenHeight);
+
+    return {x, y};
+}
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Raycast Demo");
@@ -43,7 +51,7 @@ int main()
     //player initialization
     sf::CircleShape player(5.f);
     player.setFillColor(sf::Color::Red);
-    player.setPosition(600.f, 300.f);
+    player.setPosition(screenWidth / 2.f, screenHeight / 2.f);
 
     //raycast initialization
     sf::Vertex raycast[] = {
@@ -56,8 +64,7 @@ int main()
     float rayLen = 50.f;
 
     while (window.isOpen()) {
-
-        //check for events
+        //check for window events
         sf::Event event;
         while (window.pollEvent(event)) {
             switch (event.type) {
@@ -109,8 +116,13 @@ int main()
 
                 if (worldMap[y][x] > 0) {
                     tile.setFillColor(sf::Color::Blue);
-                } else {
+                } else if (worldMap[y][x] == 0) {
                     tile.setFillColor(sf::Color::Black);
+                }
+
+                sf::Vector2f playerIndex = positionToArrayIndex(player.getPosition());
+                if (y == (int)playerIndex.y && x == (int)playerIndex.x) {
+                    tile.setFillColor(sf::Color::Green);
                 }
 
                 tile.setPosition(x * tileWidth, y * tileHeight);
