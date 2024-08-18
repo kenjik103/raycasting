@@ -35,9 +35,9 @@ int worldMap[mapWidth][mapHeight]=
                 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
         };
 
-sf::Vector2f positionToArrayIndex(sf::Vector2f pos) {
-    float x = mapWidth * (pos.x / screenWidth);
-    float y = mapHeight * (pos.y / screenHeight);
+sf::Vector2<int> positionToArrayIndex(sf::Vector2f pos) {
+    int x = mapWidth * (pos.x / screenWidth);
+    int y = mapHeight * (pos.y / screenHeight);
 
     return {x, y};
 }
@@ -65,7 +65,7 @@ int main()
 
     while (window.isOpen()) {
         //check for window events
-        sf::Event event;
+        sf::Event event{};
         while (window.pollEvent(event)) {
             switch (event.type) {
                 case sf::Event::Closed:
@@ -120,8 +120,8 @@ int main()
                     tile.setFillColor(sf::Color::Black);
                 }
 
-                sf::Vector2f playerIndex = positionToArrayIndex(player.getPosition());
-                if (y == (int)playerIndex.y && x == (int)playerIndex.x) {
+                sf::Vector2<int> playerIndex = positionToArrayIndex(player.getPosition());
+                if (y == playerIndex.y && x == playerIndex.x) {
                     tile.setFillColor(sf::Color::Green);
                 }
 
@@ -132,9 +132,19 @@ int main()
 
 
         //move logic
+        float dx = 0;
+        float dy = 0;
         float moveSpeedScalar = 1.5;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            player.move( moveSpeedScalar * rayPosX / rayLen, moveSpeedScalar * rayPosY / rayLen);
+            dx = moveSpeedScalar * rayPosX / rayLen;
+            dy = moveSpeedScalar * rayPosY / rayLen;
+        }
+        sf::Vector2<int> deltaMoveCoord = positionToArrayIndex(sf::Vector2f(
+                player.getPosition().x + player.getRadius() + dx,
+                player.getPosition().y + player.getRadius() + dy
+                ));
+        if (worldMap[deltaMoveCoord.y][deltaMoveCoord.x] == 0){
+            player.move(dx, dy);
         }
 
 
