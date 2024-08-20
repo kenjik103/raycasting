@@ -119,33 +119,26 @@ int main()
             rayLength.y = (tileSizeY * ((float)currentMapIndex.y + 1) - rayStartingPos.y) * rayUnitStepSize.y;
         }
 
+        bool tileFound = false;
+        float maxDistance = 1000.0f;
         float distance = 0.f;
-        if (rayLength.x < rayLength.y) {
-            distance = rayLength.x;
-        } else {
-            distance = rayLength.y;
-        }
+        while (!tileFound && distance < maxDistance){
+            if (rayLength.x < rayLength.y) {
+                currentMapIndex.x += step.x;
+                distance = rayLength.x;
+                rayLength.x += tileSizeX * rayUnitStepSize.x;
+            } else {
+                currentMapIndex.y += step.y;
+                distance = rayLength.y;
+                rayLength.y += tileSizeY * rayUnitStepSize.y;
+            }
 
-//        bool tileFound = false;
-//        float maxDistance = 1000.0f;
-//        float distance = 0.f;
-//        while (!tileFound && distance < maxDistance){
-//            if (rayLength.x < rayLength.y) {
-//                currentMapIndex.x += step.x;
-//                distance = rayLength.x;
-//                rayLength.x += tileSizeX * rayUnitStepSize.x;
-//            } else {
-//                currentMapIndex.y += step.y;
-//                distance = rayLength.y;
-//                rayLength.y += tileSizeY * rayUnitStepSize.y;
-//            }
-//
-//            if (currentMapIndex.x >= 0 && currentMapIndex.x <= mapWidth && currentMapIndex.y >= 0 && currentMapIndex.y <= mapHeight) {
-//                if (worldMap[currentMapIndex.y][currentMapIndex.x] > 0) {
-//                    tileFound = true;
-//                }
-//            }
-//        }
+            if (currentMapIndex.x >= 0 && currentMapIndex.x <= mapWidth && currentMapIndex.y >= 0 && currentMapIndex.y <= mapHeight) {
+                if (worldMap[currentMapIndex.y][currentMapIndex.x] > 0) {
+                    tileFound = true;
+                }
+            }
+        }
 
 
         raycast[0] = sf::Vertex(sf::Vector2f(
