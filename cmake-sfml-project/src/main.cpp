@@ -42,6 +42,59 @@ sf::Vector2i positionToArrayIndex(sf::Vector2f pos) {
     return {x, y};
 }
 
+sf::Vector2f getVectorLength(sf::Vector2f playerOrigin, float rayAngle){
+    //DDA Algorithm
+    //credit: https://www.youtube.com/watch?v=NbSee-XM7WA&t=1270s
+    sf::Vector2f rayStartingPos = {playerOrigin};
+    sf::Vector2f rayDirection = sf::Vector2f(cos(rayAngle), sin(rayAngle));
+
+    sf::Vector2f rayUnitStepSize = {abs(1 / cos(rayAngle)), abs(1 / sin(rayAngle))};
+    sf::Vector2i currentMapIndex = positionToArrayIndex(rayStartingPos);
+    sf::Vector2f rayLength;
+
+    float tileSizeX = screenWidth / (float)mapWidth;
+    float tileSizeY = screenHeight / (float)mapHeight;
+
+    sf::Vector2i step;
+    if (rayDirection.x < 0) {
+        step.x = -1;
+        rayLength.x = (rayStartingPos.x - (tileSizeX * (float)currentMapIndex.x)) * rayUnitStepSize.x;
+    } else {
+        step.x = 1;
+        rayLength.x = (tileSizeX * ((float)currentMapIndex.x + 1) - rayStartingPos.x) * rayUnitStepSize.x;
+    }
+    if (rayDirection.y < 0) {
+        step.y = -1;
+        rayLength.y = (rayStartingPos.y -  (tileSizeY * (float)currentMapIndex.y)) * rayUnitStepSize.y;
+    } else {
+        step.y = 1;
+        rayLength.y = (tileSizeY * ((float)currentMapIndex.y + 1) - rayStartingPos.y) * rayUnitStepSize.y;
+    }
+
+    bool tileFound = false;
+    float maxDistance = 1000.0f;
+    float distance = 0.f;
+    while (!tileFound && distance < maxDistance){
+        if (rayLength.x < rayLength.y) {
+            currentMapIndex.x += step.x;
+            distance = rayLength.x;
+            rayLength.x += tileSizeX * rayUnitStepSize.x;
+        } else {
+            currentMapIndex.y += step.y;
+            distance = rayLength.y;
+            rayLength.y += tileSizeY * rayUnitStepSize.y;
+        }
+
+        if (currentMapIndex.x >= 0 && currentMapIndex.x <= mapWidth && currentMapIndex.y >= 0 && currentMapIndex.y <= mapHeight) {
+            if (worldMap[currentMapIndex.y][currentMapIndex.x] > 0) {
+                tileFound = true;
+            }
+        }
+    }
+
+    return {rayDirection.x * distance, rayDirection.y * distance};
+}
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Raycast Demo");
@@ -49,9 +102,9 @@ int main()
 
 
     //player initialization
-    sf::CircleShape player(5.f);
+    sf::CircleShape player(3.f);
     player.setFillColor(sf::Color::Red);
-    player.setPosition(screenWidth / 2.f, screenHeight / 2.f);
+    player.setPosition( screenWidth / 2.f, screenHeight / 2.f);
 
     //raycast initialization
     sf::Vertex raycast[] = {
@@ -59,6 +112,15 @@ int main()
             sf::Vertex(sf::Vector2(10.f, 10.f))
     };
     float rayAngle = 0.f;
+
+    //direction vector initialization
+    sf::Vertex directionVector[] {
+            sf::Vertex(sf::Vector2f(player.getPosition())),
+            sf::Vertex(sf::Vector2(10.f, 10.f))
+    };
+
+
+    //main gameplay loop
     while (window.isOpen()) {
         //check for window events
         sf::Event event{};
@@ -78,72 +140,25 @@ int main()
 
         //ray logic
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-            rayAngle += M_PI / 64;
+            rayAngle += M_PI / 128;
             if (rayAngle >= 2 * M_PI) {
                 rayAngle = 0;
             }
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-            rayAngle -= M_PI / 64;
+            rayAngle -= M_PI / 128;
             if (rayAngle <= 0) {
                 rayAngle = 2 * M_PI;
             }
         }
 
-        //DDA Algorithm
-        //credit: https://www.youtube.com/watch?v=NbSee-XM7WA&t=1270s
-        sf::Vector2f rayStartingPos = {player.getPosition().x + player.getRadius(),
-                                       player.getPosition().y + player.getRadius()};
-        sf::Vector2f rayDirection = sf::Vector2f(cos(rayAngle), sin(rayAngle));
 
-        sf::Vector2f rayUnitStepSize = {abs(1 / cos(rayAngle)), abs(1 / sin(rayAngle))};
-        sf::Vector2i currentMapIndex = positionToArrayIndex(rayStartingPos);
-        sf::Vector2f rayLength;
-
-        float tileSizeX = screenWidth / (float)mapWidth;
-        float tileSizeY = screenHeight / (float)mapHeight;
-
-        sf::Vector2i step;
-        if (rayDirection.x < 0) {
-            step.x = -1;
-            rayLength.x = (rayStartingPos.x - (tileSizeX * (float)currentMapIndex.x)) * rayUnitStepSize.x;
-        } else {
-            step.x = 1;
-            rayLength.x = (tileSizeX * ((float)currentMapIndex.x + 1) - rayStartingPos.x) * rayUnitStepSize.x;
-        }
-        if (rayDirection.y < 0) {
-            step.y = -1;
-            rayLength.y = (rayStartingPos.y -  (tileSizeY * (float)currentMapIndex.y)) * rayUnitStepSize.y;
-        } else {
-            step.y = 1;
-            rayLength.y = (tileSizeY * ((float)currentMapIndex.y + 1) - rayStartingPos.y) * rayUnitStepSize.y;
-        }
-
-        bool tileFound = false;
-        float maxDistance = 1000.0f;
-        float distance = 0.f;
-        while (!tileFound && distance < maxDistance){
-            if (rayLength.x < rayLength.y) {
-                currentMapIndex.x += step.x;
-                distance = rayLength.x;
-                rayLength.x += tileSizeX * rayUnitStepSize.x;
-            } else {
-                currentMapIndex.y += step.y;
-                distance = rayLength.y;
-                rayLength.y += tileSizeY * rayUnitStepSize.y;
-            }
-
-            if (currentMapIndex.x >= 0 && currentMapIndex.x <= mapWidth && currentMapIndex.y >= 0 && currentMapIndex.y <= mapHeight) {
-                if (worldMap[currentMapIndex.y][currentMapIndex.x] > 0) {
-                    tileFound = true;
-                }
-            }
-        }
-
-
+        sf::Vector2f rayLength = getVectorLength(
+                {player.getPosition().x + player.getRadius(),
+                 player.getPosition().y + player.getRadius()}, rayAngle);
         raycast[0] = sf::Vertex(sf::Vector2f(
-                player.getPosition().x + player.getRadius() + (rayDirection.x * distance),
-                player.getPosition().y + player.getRadius() + (rayDirection.y * distance)));
+                player.getPosition().x + player.getRadius() + rayLength.x,
+                player.getPosition().y + player.getRadius() + rayLength.y));
         raycast[1] = sf::Vertex(sf::Vector2f(
                 player.getPosition().x + player.getRadius(),
                 player.getPosition().y + player.getRadius()
@@ -165,7 +180,10 @@ int main()
                     tile.setFillColor(sf::Color::Black);
                 }
 
-                sf::Vector2i playerIndex = positionToArrayIndex(sf::Vector2f(player.getPosition().x + player.getRadius(), player.getPosition().y + player.getRadius()));
+                sf::Vector2i playerIndex = positionToArrayIndex(sf::Vector2f(
+                        player.getPosition().x + player.getRadius(),
+                        player.getPosition().y + player.getRadius()));
+
                 if (y == playerIndex.y && x == playerIndex.x) {
                     tile.setFillColor(sf::Color::Green);
                 }
@@ -181,8 +199,8 @@ int main()
         float dy = 0;
         float moveSpeedScalar = 1.5;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            dx = moveSpeedScalar * rayDirection.x;
-            dy = moveSpeedScalar * rayDirection.y;
+            dx = moveSpeedScalar * cos(rayAngle);
+            dy = moveSpeedScalar * sin(rayAngle);
         }
         sf::Vector2i deltaMoveCoord = positionToArrayIndex(sf::Vector2f(
                 player.getPosition().x + player.getRadius() + dx,
