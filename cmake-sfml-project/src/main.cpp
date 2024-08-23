@@ -106,12 +106,6 @@ int main()
     player.setFillColor(sf::Color::Red);
     player.setPosition( screenWidth / 2.f, screenHeight / 2.f);
 
-    //raycast initialization
-    float rayAngle = 0.f;
-    sf::Vertex raycast[] = {
-            sf::Vertex(sf::Vector2f(player.getPosition())),
-            sf::Vertex(sf::Vector2(10.f, 10.f))
-    };
 
     //direction vector initialization
     float directionAngle = 0.f;
@@ -148,20 +142,26 @@ int main()
         //clear window
         window.clear(sf::Color::White);
 
-        //ray logic
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-            rayAngle += M_PI / 128;
-            if (rayAngle >= 2 * M_PI) {
-                rayAngle = 0;
-            }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-            rayAngle -= M_PI / 128;
-            if (rayAngle <= 0) {
-                rayAngle = 2 * M_PI;
+        //draw array
+        float tileWidth = screenWidth / (float)mapWidth;
+        float tileHeight = screenHeight / (float)mapHeight;
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
+
+                sf::RectangleShape tile(sf::Vector2f( tileWidth - 1.f, tileHeight - 1.f));
+
+                if (worldMap[y][x] > 0) {
+                    tile.setFillColor(sf::Color::Blue);
+                } else if (worldMap[y][x] == 0) {
+                    tile.setFillColor(sf::Color::Black);
+                }
+
+                tile.setPosition(x * tileWidth, y * tileHeight);
+                window.draw(tile);
             }
         }
 
+        //ray logic
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
             directionAngle += M_PI / 128;
             if (directionAngle >= 2 * M_PI) {
@@ -175,17 +175,6 @@ int main()
             }
         }
 
-
-        sf::Vector2f rayLength = getVectorLength(
-                {player.getPosition().x + player.getRadius(),
-                 player.getPosition().y + player.getRadius()}, rayAngle);
-        raycast[0] = sf::Vertex(sf::Vector2f(
-                player.getPosition().x + player.getRadius() + rayLength.x,
-                player.getPosition().y + player.getRadius() + rayLength.y));
-        raycast[1] = sf::Vertex(sf::Vector2f(
-                player.getPosition().x + player.getRadius(),
-                player.getPosition().y + player.getRadius()
-                ));
 
         sf::Vector2f directionVectorLocalLength = {
                 directionVectorLength * cos(directionAngle),
@@ -207,24 +196,33 @@ int main()
                 (player.getPosition().y + player.getRadius()) + (directionVectorLength / cos( fovRadianOffset)) * sin(directionAngle - fovRadianOffset)));
 
 
-        //draw array
-        float tileWidth = screenWidth / (float)mapWidth;
-        float tileHeight = screenHeight / (float)mapHeight;
-        for (int y = 0; y < mapHeight; y++) {
-            for (int x = 0; x < mapWidth; x++) {
+        float rayAngle = directionAngle - fovRadianOffset;
+        while (rayAngle < directionAngle + fovRadianOffset){
+            sf::Vertex raycast[] = {
+                    sf::Vertex(sf::Vector2f(player.getPosition())),
+                    sf::Vertex(sf::Vector2(10.f, 10.f))
+            };
 
-                sf::RectangleShape tile(sf::Vector2f( tileWidth - 1.f, tileHeight - 1.f));
+            sf::Vector2f rayLength = getVectorLength(
+                    {player.getPosition().x + player.getRadius(),
+                     player.getPosition().y + player.getRadius()}, rayAngle);
+            raycast[0] = sf::Vertex(sf::Vector2f(
+                    player.getPosition().x + player.getRadius() + rayLength.x,
+                    player.getPosition().y + player.getRadius() + rayLength.y));
+            raycast[1] = sf::Vertex(sf::Vector2f(
+                    player.getPosition().x + player.getRadius(),
+                    player.getPosition().y + player.getRadius()
+            ));
 
-                if (worldMap[y][x] > 0) {
-                    tile.setFillColor(sf::Color::Blue);
-                } else if (worldMap[y][x] == 0) {
-                    tile.setFillColor(sf::Color::Black);
-                }
+            raycast[0].color = sf::Color::Green;
+            raycast[1].color = sf::Color::Green;
 
-                tile.setPosition(x * tileWidth, y * tileHeight);
-                window.draw(tile);
-            }
+            window.draw(raycast, 2, sf::Lines);
+
+            rayAngle += M_PI / 128.f;
+
         }
+
 
 
         //move logic
@@ -232,8 +230,8 @@ int main()
         float dy = 0;
         float moveSpeedScalar = 1.5;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            dx = moveSpeedScalar * cos(rayAngle);
-            dy = moveSpeedScalar * sin(rayAngle);
+            dx = moveSpeedScalar * cos(directionAngle);
+            dy = moveSpeedScalar * sin(directionAngle);
         }
         sf::Vector2i deltaMoveCoord = positionToArrayIndex(sf::Vector2f(
                 player.getPosition().x + player.getRadius() + dx,
@@ -242,7 +240,6 @@ int main()
         if (worldMap[deltaMoveCoord.y][deltaMoveCoord.x] == 0){
             player.move(dx, dy);
         }
-
 
         //draw
         window.draw(player);
