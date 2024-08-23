@@ -107,17 +107,27 @@ int main()
     player.setPosition( screenWidth / 2.f, screenHeight / 2.f);
 
     //raycast initialization
+    float rayAngle = 0.f;
     sf::Vertex raycast[] = {
             sf::Vertex(sf::Vector2f(player.getPosition())),
             sf::Vertex(sf::Vector2(10.f, 10.f))
     };
-    float rayAngle = 0.f;
 
     //direction vector initialization
+    float directionAngle = 0.f;
+    float directionVectorLength = screenWidth /  (float)mapWidth;
     sf::Vertex directionVector[] {
             sf::Vertex(sf::Vector2f(player.getPosition())),
             sf::Vertex(sf::Vector2(10.f, 10.f))
     };
+
+    float cameraPlaneLength = 0.66 * (screenWidth / (float) mapWidth);
+    sf::Vertex cameraPlane[]{
+            sf::Vertex(sf::Vector2f(player.getPosition())),
+            sf::Vertex(sf::Vector2(10.f, 10.f))
+    };
+
+
 
 
     //main gameplay loop
@@ -152,6 +162,19 @@ int main()
             }
         }
 
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+            directionAngle += M_PI / 128;
+            if (directionAngle >= 2 * M_PI) {
+                directionAngle = 0;
+            }
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+            directionAngle -= M_PI / 128;
+            if (directionAngle <= 0) {
+                directionAngle = 2 * M_PI;
+            }
+        }
+
 
         sf::Vector2f rayLength = getVectorLength(
                 {player.getPosition().x + player.getRadius(),
@@ -164,6 +187,24 @@ int main()
                 player.getPosition().y + player.getRadius()
                 ));
 
+        sf::Vector2f directionVectorLocalLength = {
+                directionVectorLength * cos(directionAngle),
+                directionVectorLength * sin(directionAngle)};
+        directionVector[0] = sf::Vertex(sf::Vector2f(
+                player.getPosition().x + player.getRadius() + directionVectorLocalLength.x,
+                player.getPosition().y + player.getRadius() + directionVectorLocalLength.y));
+        directionVector[1] = sf::Vertex(sf::Vector2f(
+                player.getPosition().x + player.getRadius(),
+                player.getPosition().y + player.getRadius()
+        ));
+
+        float fovRadianOffset = atan(cameraPlaneLength / directionVectorLength);
+        cameraPlane[0] = sf::Vertex(sf::Vector2f(
+                (player.getPosition().x + player.getRadius()) + (directionVectorLength / cos(fovRadianOffset))  * cos(directionAngle + fovRadianOffset),
+                (player.getPosition().y + player.getRadius()) + (directionVectorLength / cos( fovRadianOffset)) * sin(directionAngle + fovRadianOffset)));
+        cameraPlane[1] = sf::Vertex(sf::Vector2f(
+                (player.getPosition().x + player.getRadius()) + (directionVectorLength / cos( fovRadianOffset)) * cos(directionAngle - fovRadianOffset),
+                (player.getPosition().y + player.getRadius()) + (directionVectorLength / cos( fovRadianOffset)) * sin(directionAngle - fovRadianOffset)));
 
 
         //draw array
@@ -178,14 +219,6 @@ int main()
                     tile.setFillColor(sf::Color::Blue);
                 } else if (worldMap[y][x] == 0) {
                     tile.setFillColor(sf::Color::Black);
-                }
-
-                sf::Vector2i playerIndex = positionToArrayIndex(sf::Vector2f(
-                        player.getPosition().x + player.getRadius(),
-                        player.getPosition().y + player.getRadius()));
-
-                if (y == playerIndex.y && x == playerIndex.x) {
-                    tile.setFillColor(sf::Color::Green);
                 }
 
                 tile.setPosition(x * tileWidth, y * tileHeight);
@@ -213,7 +246,8 @@ int main()
 
         //draw
         window.draw(player);
-        window.draw(raycast, 2, sf::Lines);
+        window.draw(directionVector, 2, sf::Lines);
+        window.draw(cameraPlane, 2, sf::Lines);
 
         //update
         window.display();
