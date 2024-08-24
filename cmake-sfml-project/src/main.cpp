@@ -7,7 +7,7 @@
 #define screenWidth 640
 #define screenHeight 480
 
-int side;
+int side; //not good practice but its a small project so i can get away with it :p
 
 int worldMap[mapWidth][mapHeight]=
         {
@@ -225,20 +225,9 @@ int main()
             };
 
             sf::Vector2f endingPos = {
-                    player.getPosition().x + player.getRadius() + rayLength.x,
-                    player.getPosition().y + player.getRadius() + rayLength.y
+                    player.getPosition().x + player.getRadius() + rayLength.x * 1.0001f,//extend the ray a tiny tiny bit so it properly intersects with each world space block
+                    player.getPosition().y + player.getRadius() + rayLength.y * 1.0001f
             };
-
-            if (rayAngle > M_PI) {
-                endingPos.y -= 1;
-            } else {
-                endingPos.y += 1;
-            }
-            if (rayAngle > M_PI / 2 && rayAngle < (3 * M_PI) / 2) {
-                endingPos.x -= 1;
-            } else {
-                endingPos.x += 1;
-            }
 
             sf::Vector2i endingIndex = positionToArrayIndex(endingPos);
 
@@ -268,7 +257,7 @@ int main()
                 case 2:  color = sf::Color::Green;  break;
                 case 3:  color = sf::Color::Red;   break;
                 case 4:  color = sf::Color::Cyan;  break;
-                case 5: color = sf::Color::White; break;
+                case 5: color = sf::Color::Yellow; break;
                 default: color = sf::Color::Magenta; break;
             }
 
@@ -276,15 +265,15 @@ int main()
             if (side == 1) colorVal = color.toInteger() * 0.8;
 
             //draw the pixels of the stripe as a vertical line
-            sf::RectangleShape rectangle(sf::Vector2f(7, drawEnd));
-            rectangle.setPosition( rayCount * 7, drawStart);
+            sf::RectangleShape rectangle(sf::Vector2f(3.5, drawEnd));
+            rectangle.setPosition( rayCount * 3.4, drawStart);
             rectangle.setFillColor(sf::Color{colorVal});
 
             mainView.draw(rectangle);
 
             flatWindow.draw(raycast, 2, sf::Lines);
 
-            rayAngle += M_PI / 256.f;
+            rayAngle += M_PI / 512.f;
             rayCount += 1.f;
 
         }
