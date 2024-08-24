@@ -220,11 +220,24 @@ int main()
                     })
             };
 
-            sf::Vector2i endingPos = positionToArrayIndex(
-                    {
-                            player.getPosition().x + player.getRadius() + rayLength.x,
-                            player.getPosition().y + player.getRadius() + rayLength.y
-                    } );
+            sf::Vector2f endingPos = {
+                    player.getPosition().x + player.getRadius() + rayLength.x,
+                    player.getPosition().y + player.getRadius() + rayLength.y
+            };
+
+            int side = 0;
+            if (rayAngle > M_PI) {
+                endingPos.y -= 1;
+            } else {
+                endingPos.y += 1;
+            }
+            if (rayAngle > M_PI / 2 && rayAngle < (3 * M_PI) / 2) {
+                endingPos.x -= 1;
+            } else {
+                endingPos.x += 1;
+            }
+
+            sf::Vector2i endingIndex = positionToArrayIndex(endingPos);
 
             raycast[0].color = sf::Color::Green;
             raycast[1].color = sf::Color::Green;
@@ -246,25 +259,29 @@ int main()
             if(drawEnd >= screenHeight)drawEnd = screenHeight - 1;
 
             sf::Color color;
-            switch(worldMap[endingPos.x][endingPos.y])
+            switch(worldMap[endingIndex.y][endingIndex.x])
             {
                 case 1:  color = sf::Color::Blue;  break;
                 case 2:  color = sf::Color::Green;  break;
                 case 3:  color = sf::Color::Red;   break;
-                case 4:  color = sf::Color::White;  break;
-                default: color = sf::Color::Yellow; break;
+                case 4:  color = sf::Color::Cyan;  break;
+                case 5: color = sf::Color::White; break;
+                default: color = sf::Color::Magenta; break;
             }
 
+            uint32_t colorVal = color.toInteger();
+            if (side == 1) colorVal = color.toInteger() / 2;
+
             //draw the pixels of the stripe as a vertical line
-            sf::RectangleShape rectangle(sf::Vector2f(10, drawEnd));
-            rectangle.setPosition( rayCount * 14, drawStart);
-            rectangle.setFillColor(color);
+            sf::RectangleShape rectangle(sf::Vector2f(7, drawEnd));
+            rectangle.setPosition( rayCount * 7, drawStart);
+            rectangle.setFillColor(sf::Color{colorVal});
 
             mainView.draw(rectangle);
 
             flatWindow.draw(raycast, 2, sf::Lines);
 
-            rayAngle += M_PI / 128.f;
+            rayAngle += M_PI / 256.f;
             rayCount += 1.f;
 
         }
