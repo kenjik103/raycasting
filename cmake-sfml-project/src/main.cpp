@@ -7,6 +7,8 @@
 #define screenWidth 640
 #define screenHeight 480
 
+int side;
+
 int worldMap[mapWidth][mapHeight]=
         {
                 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -79,10 +81,12 @@ sf::Vector2f getVectorLength(sf::Vector2f playerOrigin, float rayAngle){
             currentMapIndex.x += step.x;
             distance = rayLength.x;
             rayLength.x += tileSizeX * rayUnitStepSize.x;
+            side = 0;
         } else {
             currentMapIndex.y += step.y;
             distance = rayLength.y;
             rayLength.y += tileSizeY * rayUnitStepSize.y;
+            side = 1;
         }
 
         if (currentMapIndex.x >= 0 && currentMapIndex.x <= mapWidth && currentMapIndex.y >= 0 && currentMapIndex.y <= mapHeight) {
@@ -225,7 +229,6 @@ int main()
                     player.getPosition().y + player.getRadius() + rayLength.y
             };
 
-            int side = 0;
             if (rayAngle > M_PI) {
                 endingPos.y -= 1;
             } else {
@@ -270,7 +273,7 @@ int main()
             }
 
             uint32_t colorVal = color.toInteger();
-            if (side == 1) colorVal = color.toInteger() / 2;
+            if (side == 1) colorVal = color.toInteger() * 0.8;
 
             //draw the pixels of the stripe as a vertical line
             sf::RectangleShape rectangle(sf::Vector2f(7, drawEnd));
