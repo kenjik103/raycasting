@@ -97,9 +97,12 @@ sf::Vector2f getVectorLength(sf::Vector2f playerOrigin, float rayAngle){
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Raycast Demo");
-    window.setVerticalSyncEnabled(true);
+    sf::RenderWindow flatWindow(sf::VideoMode(screenWidth, screenHeight), "2D View");
+    flatWindow.setVerticalSyncEnabled(true);
 
+
+    sf::RenderWindow mainView(sf::VideoMode(screenWidth, screenHeight), "3D View");
+    mainView.setVerticalSyncEnabled(true);
 
     //player initialization
     sf::CircleShape player(3.f);
@@ -125,13 +128,14 @@ int main()
 
 
     //main gameplay loop
-    while (window.isOpen()) {
+    while (flatWindow.isOpen()) {
         //check for window events
         sf::Event event{};
-        while (window.pollEvent(event)) {
+        while (flatWindow.pollEvent(event) || mainView.pollEvent(event)) {
             switch (event.type) {
                 case sf::Event::Closed:
-                    window.close();
+                    flatWindow.close();
+                    mainView.close();
                     break;
 
                 default:
@@ -140,7 +144,8 @@ int main()
         }
 
         //clear window
-        window.clear(sf::Color::White);
+        flatWindow.clear(sf::Color::White);
+        mainView.clear(sf::Color::Black);
 
         //draw array
         float tileWidth = screenWidth / (float)mapWidth;
@@ -157,7 +162,7 @@ int main()
                 }
 
                 tile.setPosition(x * tileWidth, y * tileHeight);
-                window.draw(tile);
+                flatWindow.draw(tile);
             }
         }
 
@@ -196,30 +201,71 @@ int main()
                 (player.getPosition().y + player.getRadius()) + (directionVectorLength / cos( fovRadianOffset)) * sin(directionAngle - fovRadianOffset)));
 
 
+        //create and draw raycasts
         float rayAngle = directionAngle - fovRadianOffset;
+        float rayCount = 0.f;
         while (rayAngle < directionAngle + fovRadianOffset){
-            sf::Vertex raycast[] = {
-                    sf::Vertex(sf::Vector2f(player.getPosition())),
-                    sf::Vertex(sf::Vector2(10.f, 10.f))
-            };
-
             sf::Vector2f rayLength = getVectorLength(
                     {player.getPosition().x + player.getRadius(),
                      player.getPosition().y + player.getRadius()}, rayAngle);
-            raycast[0] = sf::Vertex(sf::Vector2f(
-                    player.getPosition().x + player.getRadius() + rayLength.x,
-                    player.getPosition().y + player.getRadius() + rayLength.y));
-            raycast[1] = sf::Vertex(sf::Vector2f(
-                    player.getPosition().x + player.getRadius(),
-                    player.getPosition().y + player.getRadius()
-            ));
+
+            sf::Vertex raycast[] = {
+                    sf::Vertex({
+                        player.getPosition().x + player.getRadius(),
+                        player.getPosition().y + player.getRadius()
+                    }),
+                    sf::Vertex({
+                        player.getPosition().x + player.getRadius() + rayLength.x,
+                        player.getPosition().y + player.getRadius() + rayLength.y
+                    })
+            };
+
+            sf::Vector2i endingPos = positionToArrayIndex(
+                    {
+                            player.getPosition().x + player.getRadius() + rayLength.x,
+                            player.getPosition().y + player.getRadius() + rayLength.y
+                    } );
 
             raycast[0].color = sf::Color::Green;
             raycast[1].color = sf::Color::Green;
 
-            window.draw(raycast, 2, sf::Lines);
+            //player to camera
+            float playerToCameraLength = directionVectorLength / cos(fovRadianOffset);
+
+            //ray to wall
+            float cameraRayToWall = sqrt(rayLength.x * rayLength.x + rayLength.y * rayLength.y) - playerToCameraLength;
+
+            //camera plane to wall
+            float cameraPlaneToWall = abs(sin(270.f - fovRadianOffset) * cameraRayToWall);
+
+            int wallHeight = (int)((screenHeight / cameraPlaneToWall) * (screenWidth / mapWidth));
+
+            int drawStart = -wallHeight / 2 + screenHeight / 2;
+            if(drawStart < 0)drawStart = 0;
+            int drawEnd = wallHeight;
+            if(drawEnd >= screenHeight)drawEnd = screenHeight - 1;
+
+            sf::Color color;
+            switch(worldMap[endingPos.x][endingPos.y])
+            {
+                case 1:  color = sf::Color::Blue;  break;
+                case 2:  color = sf::Color::Green;  break;
+                case 3:  color = sf::Color::Red;   break;
+                case 4:  color = sf::Color::White;  break;
+                default: color = sf::Color::Yellow; break;
+            }
+
+            //draw the pixels of the stripe as a vertical line
+            sf::RectangleShape rectangle(sf::Vector2f(10, drawEnd));
+            rectangle.setPosition( rayCount * 14, drawStart);
+            rectangle.setFillColor(color);
+
+            mainView.draw(rectangle);
+
+            flatWindow.draw(raycast, 2, sf::Lines);
 
             rayAngle += M_PI / 128.f;
+            rayCount += 1.f;
 
         }
 
@@ -242,12 +288,13 @@ int main()
         }
 
         //draw
-        window.draw(player);
-        window.draw(directionVector, 2, sf::Lines);
-        window.draw(cameraPlane, 2, sf::Lines);
+        flatWindow.draw(player);
+        flatWindow.draw(directionVector, 2, sf::Lines);
+        flatWindow.draw(cameraPlane, 2, sf::Lines);
 
         //update
-        window.display();
+        flatWindow.display();
+        mainView.display();
 
     }
 
