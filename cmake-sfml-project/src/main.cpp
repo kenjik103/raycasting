@@ -7,8 +7,6 @@
 #define screenWidth 640
 #define screenHeight 480
 
-int side; //not good practice but its a small project so i can get away with it :p
-
 int worldMap[mapWidth][mapHeight]=
         {
                 {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -44,7 +42,7 @@ sf::Vector2i positionToArrayIndex(sf::Vector2f pos) {
     return {x, y};
 }
 
-sf::Vector2f getVectorLength(sf::Vector2f playerOrigin, float rayAngle){
+sf::Vector2f getVectorLength(sf::Vector2f playerOrigin, float rayAngle, int &side){
     //DDA Algorithm
     //credit: https://www.youtube.com/watch?v=NbSee-XM7WA&t=1270s
     sf::Vector2f rayStartingPos = {playerOrigin};
@@ -208,10 +206,11 @@ int main()
         //create and draw raycasts
         float rayAngle = directionAngle - fovRadianOffset;
         float rayCount = 0.f;
+        int side;
         while (rayAngle < directionAngle + fovRadianOffset){
             sf::Vector2f rayLength = getVectorLength(
                     {player.getPosition().x + player.getRadius(),
-                     player.getPosition().y + player.getRadius()}, rayAngle);
+                     player.getPosition().y + player.getRadius()}, rayAngle, side);
 
             sf::Vertex raycast[] = {
                     sf::Vertex({

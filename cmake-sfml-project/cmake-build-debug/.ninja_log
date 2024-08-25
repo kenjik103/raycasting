@@ -91,3 +91,11 @@
 301	381	1724541926259535916	bin/main	df8c3750840631fc
 2325	2557	1723338480796930793	_deps/sfml-build/src/SFML/Graphics/CMakeFiles/sfml-graphics.dir/RectangleShape.cpp.o	169000b9789ed3a4
 593	749	1723342291457940473	_deps/sfml-build/src/SFML/Graphics/CMakeFiles/sfml-graphics.dir/Transform.cpp.o	d6b6a92dccf1d390
+26	377	1724618633134858976	CMakeFiles/main.dir/src/main.cpp.o	4963efc7538c4d68
+25	685	1724618633134139691	_deps/sfml-build/src/SFML/Window/CMakeFiles/sfml-window.dir/OSX/cg_sf_conversion.mm.o	900ada34c692b14f
+26	715	1724618633134650603	_deps/sfml-build/src/SFML/Window/CMakeFiles/sfml-window.dir/OSX/WindowImplCocoa.mm.o	de53746e78938848
+25	719	1724618633134496980	_deps/sfml-build/src/SFML/Window/CMakeFiles/sfml-window.dir/OSX/SFWindowController.mm.o	7d8d3d7e0ae468c2
+719	819	1724618633828156105	_deps/sfml-build/lib/libsfml-window-s-d.a	8d1109e3b502cc31
+819	907	1724618633927678054	bin/main	df8c3750840631fc
+13	306	1724618684009426029	CMakeFiles/main.dir/src/main.cpp.o	4963efc7538c4d68
+306	386	1724618684303109294	bin/main	df8c3750840631fc
