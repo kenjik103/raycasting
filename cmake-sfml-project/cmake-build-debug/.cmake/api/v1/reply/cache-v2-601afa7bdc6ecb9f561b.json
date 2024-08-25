@@ -1958,6 +1958,18 @@
 			"value" : "/Users/ken-chan/projects/raycasting/cmake-sfml-project/cmake-build-debug/_deps/sfml-src/extlibs/libs-osx/Frameworks/ogg.framework"
 		},
 		{
+			"name" : "OPENAL_FULL_PATH",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a file."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/Users/ken-chan/projects/raycasting/cmake-sfml-project/cmake-build-debug/_deps/sfml-src/extlibs/libs-osx/Frameworks/OpenAL.framework/OpenAL"
+		},
+		{
 			"name" : "OPENAL_INCLUDE_DIR",
 			"properties" : 
 			[
@@ -2315,7 +2327,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "general;sfml-system;"
+			"value" : "general;OpenAL::OpenAL;general;sfml-system;"
 		},
 		{
 			"name" : "sfml-graphics_LIB_DEPENDS",

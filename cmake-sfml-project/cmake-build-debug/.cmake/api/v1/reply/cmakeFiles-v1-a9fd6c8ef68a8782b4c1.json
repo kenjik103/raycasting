@@ -291,9 +291,8 @@
 			"path" : "cmake-build-debug/_deps/sfml-src/src/SFML/Audio/CMakeLists.txt"
 		},
 		{
-			"isCMake" : true,
-			"isExternal" : true,
-			"path" : "/Users/ken-chan/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.28/Modules/FindOpenAL.cmake"
+			"isGenerated" : true,
+			"path" : "cmake-build-debug/_deps/sfml-src/cmake/Modules/FindOpenAL.cmake"
 		},
 		{
 			"isCMake" : true,
