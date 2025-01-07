@@ -174,11 +174,11 @@ int main(void) {
     // +++++++++++ CONTROLS ++++++++++++++++++++++++++++++++++++++++++++++++
     if (IsKeyDown(KEY_UP)) {
       if (worldMap[player.pos.y][static_cast<size_t>(
-              player.pos.x + player.pos.x * speedModifier)] == 0) {
+              player.pos.x + player.dir.x * speedModifier)] == 0) {
         player.pos.x += player.dir.x * speedModifier;
       }
       if (worldMap[static_cast<size_t>(
-              player.pos.y + player.pos.y * speedModifier)][player.pos.x] == 0) {
+              player.pos.y + player.dir.y * speedModifier)][player.pos.x] == 0) {
         player.pos.y += player.dir.y * speedModifier;
       }
     }
