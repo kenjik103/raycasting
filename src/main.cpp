@@ -1,51 +1,64 @@
 #include "raylib.h"
+#include "textures.h"
 
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <vector>
 
 #include "raylib.h"
 
 constexpr size_t mapWidth{24};
 constexpr size_t mapHeight{24};
+constexpr int texWidth{64};
+constexpr int texHeight{64};
 constexpr int screenWidth{640};
 constexpr int screenHeight{480};
 
-constexpr float speedModifier{0.03f};
-constexpr float rotationModifier{0.01f};
+constexpr float speedModifier{0.04f};
+constexpr float rotationModifier{0.009f};
 
 constexpr std::array<std::array<int, mapWidth>, mapHeight> worldMap = {
-    {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 4, 0, 0, 0, 0, 5, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 4, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}};
+    {{4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7},
+     {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 7},
+     {4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7},
+     {4, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7},
+     {4, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 7},
+     {4, 0, 4, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 0, 7, 7, 7, 7, 7},
+     {4, 0, 5, 0, 0, 0, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 7, 0, 0, 0, 7, 7, 7, 1},
+     {4, 0, 6, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 8},
+     {4, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 1},
+     {4, 0, 8, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 8},
+     {4, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 7, 7, 7, 1},
+     {4, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 1},
+     {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+     {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
+     {6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+     {4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 6, 0, 6, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3},
+     {4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2},
+     {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2, 0, 0, 5, 0, 0, 2, 0, 0, 0, 2},
+     {4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2},
+     {4, 0, 6, 0, 6, 0, 0, 0, 0, 4, 6, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 2},
+     {4, 0, 0, 5, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2},
+     {4, 0, 6, 0, 6, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 5, 0, 0, 2, 0, 0, 0, 2},
+     {4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2},
+     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3}}};
 
 struct Player {
   Vector2 pos;
   Vector2 dir;
   Vector2 plane;
 };
+
+const char *textureFiles[]{
+    "textures/eagle.png",       "textures/redbrick.png",
+    "textures/purplestone.png", "textures/greystone.png",
+    "textures/bluestone.png",   "textures/mossy.png",
+    "textures/wood.png",        "textures/colorstone.png",
+};
+
+enum class Side { xSide, ySide };
 
 void rotateVector(Vector2 &v, float theta) {
   v.x = cos(theta) * v.x - sin(theta) * v.y;
@@ -55,6 +68,10 @@ void rotateVector(Vector2 &v, float theta) {
 int main(void) {
   InitWindow(screenWidth, screenHeight, "Raycast");
   Player player{{22, 12}, {-1, 0}, {0, 0.66}};
+  // intitialize textures
+  Textures textures;
+  size_t numTextures = sizeof(textureFiles) / sizeof(textureFiles[0]);
+  textures.initialize(textureFiles, numTextures);
 
   SetTargetFPS(60); // Set our game to run at 60 frames-per-second
 
@@ -89,8 +106,7 @@ int main(void) {
 
       // have we hit a wall
       bool hit{false};
-      // side = 0 if x side of wall was hit, 1 if y side
-      int side{};
+      Side side{};
 
       // initial side distance
       if (rayDir.x < 0) {
@@ -112,65 +128,70 @@ int main(void) {
         if (rayMagnitude.x < rayMagnitude.y) {
           rayMagnitude.x += stepSize.x;
           mapX += static_cast<size_t>(stepX);
-          side = 0;
+          side = Side::xSide;
         } else {
           rayMagnitude.y += stepSize.y;
           mapY += static_cast<size_t>(stepY);
-          side = 1;
+          side = Side::ySide;
         }
         if (worldMap[mapY][mapX] > 0) {
           hit = true;
         }
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //++++++++++++++++++++++++++DRAWING+++++++++++++++++++++++++++++++++++
 
         // get fisheye corrected wall distance
-        float camToWallDist{(side == 0) ? (rayMagnitude.x - stepSize.x)
-                                        : (rayMagnitude.y - stepSize.y)};
+        float camToWallDist{(side == Side::ySide)
+                                ? (rayMagnitude.x - stepSize.x)
+                                : (rayMagnitude.y - stepSize.y)};
 
         // get wall height
         int wallHeight = static_cast<int>(screenHeight / camToWallDist);
 
         // calculate bottom and top of wall
-        int wallBottom = (screenHeight / 2) - (wallHeight / 2);
-        if (wallBottom < 0) {
-          wallBottom = 0;
-        }
-        int wallTop = (screenHeight / 2) + (wallHeight / 2);
-        if (wallTop >= screenHeight) {
-          wallTop = screenHeight;
+        int wallTop{(screenHeight / 2) - (wallHeight / 2)};
+        if (wallTop < 0) {
+          wallTop = 0;
         }
 
-        // collor wall based on map number
-        Color color{};
-        switch (worldMap[mapY][mapX]) {
-        case 0:
-          break;
-        case 1:
-          color = RED;
-          break;
-        case 2:
-          color = GREEN;
-          break;
-        case 3:
-          color = BLUE;
-          break;
-        case 4:
-          color = WHITE;
-          break;
-        default:
-          color = MAGENTA;
-          break;
+        int wallBottom{(screenHeight / 2) + (wallHeight / 2)};
+        if (wallBottom >= screenHeight) {
+          wallBottom = screenHeight;
         }
 
-        // dim y-side of walls
-        if (side == 1) {
-          color = ColorContrast(color, -0.2f);
+        [[maybe_unused]] size_t texCoord{static_cast<size_t>(worldMap[mapY][mapX] - 1)};
+
+        // calculate ray position on wall
+        int wallX{};
+        if (side == Side::ySide) {
+          wallX = player.pos.x + rayDir.x * camToWallDist;
+        } else {
+          wallX = player.pos.y + rayDir.y * camToWallDist;
+        }
+        wallX -= std::floor(wallX); // extract the frational bit
+
+        // convert wall position to texture
+        [[maybe_unused]]int texX{static_cast<int>(texWidth * wallX)};
+        if (side == Side::xSide && rayDir.x > 0) {
+          texX = texWidth - texX - 1; // flip
+        }
+        if (side == Side::ySide && rayDir.y < 0) {
+          texX = texWidth - texX - 1; // flip
         }
 
-        // draw the pixels of the stripe as a vertical line
-        DrawLine(x, wallBottom, x, wallTop, color);
+        double step{1.0 * texHeight / wallHeight};
+        double texPos{0};
+        for (int y{wallTop}; y < wallBottom; ++y) {
+         [[maybe_unused]] int texY = (int)texPos & (texHeight - 1);
+          texPos += step;
+
+          // get texture color here
+ //         DrawPixel(x, y,
+  //                  textures.textures[texCoord][static_cast<size_t>(
+  //                      (texY * texHeight) + texX)]);
+        }
       }
     }
+
     // +++++++++++ CONTROLS ++++++++++++++++++++++++++++++++++++++++++++++++
     if (IsKeyDown(KEY_UP)) {
       if (worldMap[player.pos.y][static_cast<size_t>(
@@ -178,7 +199,8 @@ int main(void) {
         player.pos.x += player.dir.x * speedModifier;
       }
       if (worldMap[static_cast<size_t>(
-              player.pos.y + player.dir.y * speedModifier)][player.pos.x] == 0) {
+              player.pos.y + player.dir.y * speedModifier)][player.pos.x] ==
+          0) {
         player.pos.y += player.dir.y * speedModifier;
       }
     }
@@ -188,15 +210,16 @@ int main(void) {
         player.pos.x -= player.dir.x * speedModifier;
       }
       if (worldMap[static_cast<size_t>(
-              player.pos.y - player.pos.y * speedModifier)][player.pos.x] == 0) {
+              player.pos.y - player.pos.y * speedModifier)][player.pos.x] ==
+          0) {
         player.pos.y -= player.dir.y * speedModifier;
       }
     }
-    if (IsKeyDown(KEY_RIGHT)){
+    if (IsKeyDown(KEY_RIGHT)) {
       rotateVector(player.dir, -rotationModifier);
       rotateVector(player.plane, -rotationModifier);
     }
-    if (IsKeyDown(KEY_LEFT)){
+    if (IsKeyDown(KEY_LEFT)) {
       rotateVector(player.dir, rotationModifier);
       rotateVector(player.plane, rotationModifier);
     }
