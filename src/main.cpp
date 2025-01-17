@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
 #include <vector>
 
 #include "raylib.h"
@@ -20,30 +21,30 @@ constexpr float speedModifier{0.04f};
 constexpr float rotationModifier{0.009f};
 
 constexpr std::array<std::array<int, mapWidth>, mapHeight> worldMap = {
-    {{4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7},
-     {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 7},
-     {4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7},
-     {4, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7},
-     {4, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 7},
-     {4, 0, 4, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 0, 7, 7, 7, 7, 7},
-     {4, 0, 5, 0, 0, 0, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 7, 0, 0, 0, 7, 7, 7, 1},
-     {4, 0, 6, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 8},
-     {4, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 1},
-     {4, 0, 8, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 8},
-     {4, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 7, 7, 7, 1},
-     {4, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 1},
-     {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
-     {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
-     {6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
-     {4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 6, 0, 6, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3},
-     {4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2},
-     {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2, 0, 0, 5, 0, 0, 2, 0, 0, 0, 2},
-     {4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2},
-     {4, 0, 6, 0, 6, 0, 0, 0, 0, 4, 6, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 2},
-     {4, 0, 0, 5, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2},
-     {4, 0, 6, 0, 6, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 5, 0, 0, 2, 0, 0, 0, 2},
-     {4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2},
-     {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3}}};
+    {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 4, 0, 0, 0, 0, 5, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 4, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}};
 
 struct Player {
   Vector2 pos;
@@ -57,8 +58,6 @@ const char *textureFiles[]{
     "textures/bluestone.png",   "textures/mossy.png",
     "textures/wood.png",        "textures/colorstone.png",
 };
-
-enum class Side { xSide, ySide };
 
 void rotateVector(Vector2 &v, float theta) {
   v.x = cos(theta) * v.x - sin(theta) * v.y;
@@ -106,7 +105,8 @@ int main(void) {
 
       // have we hit a wall
       bool hit{false};
-      Side side{};
+
+      int side{};
 
       // initial side distance
       if (rayDir.x < 0) {
@@ -128,67 +128,65 @@ int main(void) {
         if (rayMagnitude.x < rayMagnitude.y) {
           rayMagnitude.x += stepSize.x;
           mapX += static_cast<size_t>(stepX);
-          side = Side::xSide;
+          side = 0;
         } else {
           rayMagnitude.y += stepSize.y;
           mapY += static_cast<size_t>(stepY);
-          side = Side::ySide;
+          side = 1;
         }
         if (worldMap[mapY][mapX] > 0) {
           hit = true;
         }
-        //++++++++++++++++++++++++++DRAWING+++++++++++++++++++++++++++++++++++
+      }
 
-        // get fisheye corrected wall distance
-        float camToWallDist{(side == Side::ySide)
-                                ? (rayMagnitude.x - stepSize.x)
-                                : (rayMagnitude.y - stepSize.y)};
+      //++++++++++++++++++++++++++DRAWING+++++++++++++++++++++++++++++++++++
 
-        // get wall height
-        int wallHeight = static_cast<int>(screenHeight / camToWallDist);
+      // get fisheye corrected wall distance
+      float camToWallDist{(side == 0) ? (rayMagnitude.x - stepSize.x)
+                                      : (rayMagnitude.y - stepSize.y)};
+      // get wall height
+      int wallHeight = static_cast<int>(screenHeight / camToWallDist);
 
-        // calculate bottom and top of wall
-        int wallTop{(screenHeight / 2) - (wallHeight / 2)};
-        if (wallTop < 0) {
-          wallTop = 0;
-        }
+      // calculate bottom and top of wall
+      int wallTop{(screenHeight / 2) - (wallHeight / 2)};
+      if (wallTop < 0) {
+        wallTop = 0;
+      }
 
-        int wallBottom{(screenHeight / 2) + (wallHeight / 2)};
-        if (wallBottom >= screenHeight) {
-          wallBottom = screenHeight;
-        }
+      int wallBottom{(screenHeight / 2) + (wallHeight / 2)};
+      if (wallBottom >= screenHeight) {
+        wallBottom = screenHeight - 1;
+      }
+      [[maybe_unused]] size_t texCoord{static_cast<size_t>(worldMap[mapY][mapX] - 1)};
 
-        [[maybe_unused]] size_t texCoord{static_cast<size_t>(worldMap[mapY][mapX] - 1)};
+      // calculate ray position on wall
+      double wallX{};
+      if (side == 0) {
+        wallX = player.pos.x + rayDir.x * camToWallDist;
+      } else {
+        wallX = player.pos.y + rayDir.y * camToWallDist;
+      }
+      wallX -= std::floor(wallX); // extract the frational bit
 
-        // calculate ray position on wall
-        int wallX{};
-        if (side == Side::ySide) {
-          wallX = player.pos.x + rayDir.x * camToWallDist;
-        } else {
-          wallX = player.pos.y + rayDir.y * camToWallDist;
-        }
-        wallX -= std::floor(wallX); // extract the frational bit
+      // convert wall position to texture
+      [[maybe_unused]] int texX{static_cast<int>(texWidth * wallX)};
+      if (side == 0 && rayDir.x > 0) {
+        texX = texWidth - texX - 1; // flip
+      }
+      if (side == 1 && rayDir.y < 0) {
+        texX = texWidth - texX - 1; // flip
+      }
 
-        // convert wall position to texture
-        [[maybe_unused]]int texX{static_cast<int>(texWidth * wallX)};
-        if (side == Side::xSide && rayDir.x > 0) {
-          texX = texWidth - texX - 1; // flip
-        }
-        if (side == Side::ySide && rayDir.y < 0) {
-          texX = texWidth - texX - 1; // flip
-        }
-
-        double step{1.0 * texHeight / wallHeight};
-        double texPos{0};
-        for (int y{wallTop}; y < wallBottom; ++y) {
-         [[maybe_unused]] int texY = (int)texPos & (texHeight - 1);
-          texPos += step;
-
-          // get texture color here
- //         DrawPixel(x, y,
-  //                  textures.textures[texCoord][static_cast<size_t>(
-  //                      (texY * texHeight) + texX)]);
-        }
+      double step{1.0 * texHeight / wallHeight};
+      double texPos{(wallTop - screenHeight / 2.0 + wallHeight / 2.0) * step};
+      for (int y{wallTop}; y < wallBottom; ++y) {
+        [[maybe_unused]] int texY = (int)texPos & (texHeight - 1);
+        texPos += step;
+        // get texture color here
+        DrawPixel(x, y,
+                  WHITE);
+//textures.textures[texCoord][static_cast<size_t>(
+ //                     (texY * texHeight) + texX)]
       }
     }
 
