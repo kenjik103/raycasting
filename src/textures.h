@@ -30,11 +30,9 @@ struct Textures {
       for (size_t y{}; y < height; ++y) {
         for (size_t x{}; x < width; x += 4) {
           size_t b{height * y + x};
-          std::cout << std::format("{}, {}, {}, {}\n", (int)image[b],
-                                   (int)image[b + 1], (int)image[b + 2],
-                                   (int)image[b + 3]);
-         // textures[i][b / 4] = Color((int)image[b], (int)image[b + 1],
-         //                            (int)image[b + 2], (int)image[b + 3]);
+
+          textures[i][b / 4] = Color((int)image[b], (int)image[b + 1],
+                                     (int)image[b + 2], (int)image[b + 3]);
         }
       }
     }
