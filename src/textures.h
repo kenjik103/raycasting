@@ -25,7 +25,6 @@ struct Textures {
       unsigned width{};
       unsigned height{};
       loadTexture(filenames[i], image, width, height);
-      std::cout << std::format("{},{}", width, height);
 
       textures[i].resize(width * height);
 
