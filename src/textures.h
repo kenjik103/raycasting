@@ -25,15 +25,13 @@ struct Textures {
       unsigned width{};
       unsigned height{};
       loadTexture(filenames[i], image, width, height);
+      std::cout << std::format("{},{}", width, height);
+
       textures[i].resize(width * height);
 
-      for (size_t y{}; y < height; ++y) {
-        for (size_t x{}; x < width; x += 4) {
-          size_t b{height * y + x};
-
-          textures[i][b / 4] = Color((int)image[b], (int)image[b + 1],
-                                     (int)image[b + 2], (int)image[b + 3]);
-        }
+      for (size_t b{}; b < (width * height * 4); b += 4) {
+        textures[i][b/4] = Color((int)image[b], (int)image[b + 1],
+                               (int)image[b + 2], (int)image[b + 3]);
       }
     }
   }
