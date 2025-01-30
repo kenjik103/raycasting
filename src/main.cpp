@@ -71,7 +71,7 @@ int main(void) {
 
   textures.initialize(textureFiles, 8);
 
-  SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+  SetTargetFPS(30); // Set our game to run at 30 frames-per-second
 
   BeginDrawing();
   // Main game loop
